@@ -1,34 +1,28 @@
 #!/usr/bin/env python
 from __future__ import division # just like gangstas do 
 
+
+ 
+import enthought.traits.ui
 import numpy as np 
 import sys
 from nibabel import load  
 import nipype.pipeline.engine as pe
+from nipype.interfaces.base import traits, TraitedSpec, CommandLineInputSpec, CommandLine
+# traits is the module containing the traits, TraitedSpec is the class you can inherit from
 import nipype.interfaces.fsl as fsl
 fsl.FSLCommand.set_default_output_type('NIFTI')
-import nipype.interfaces.matlab as matlab
 import os 
 
 
 
-nipype_methods = dir(nipype)
 ########
 ## Make it so that you input just the string filenames from the terminal or whatever
 ## Keep it as generalizable as possible
 ## Here it goes
+# We have 5 nodes to worry about, all in fsl. Can extend to afni n shit later
 ####### 
 
-
-
-
-#### Build error class for exceptions
-
-class ErrorHandling(nyp):
-	"""
-	For handling nipype/nipy/nibabel errors 
-	"""
-	def 
 
 
 
@@ -38,6 +32,8 @@ tolist = lambda x: [x] # quick int/string/float to list
 cwd = os.getcwd() # for joining paths and shit
 search = {0: [0,0], 1: [-90,90], 2: [-180,180]} # search function type; 1=none, 2=half, 3=full
 cost_func = {0:'corratio', 1:'mutualinfo', 2:'normmi', 3:'normcorr', 4:'leastsq'}
+
+
 
 def itrpfnirt(interp):
 	interp = interp.lower() # remove upper case problem
@@ -171,6 +167,21 @@ def spatial_smooth(brain, fwhm):
 		except ValueError:
 			print "ValueError: {0} is not a valid FWHM for Gaussian Smoothing".format(fwhm)
 			raise SystemExit
+
+
+
+def temporal_smooth(in_file, sigma_low, sigma_high):
+	"""
+	Bandpass filter-maker... kinda. For RS data you want to low pass so create a 
+	low pass bandpass filter, if that makes sense 
+
+	essentially you want  2>sigma>4 seconds
+	"""
+	in_time = fsl.TemporalFilter()
+	in_time.inputs.in_file = in_file
+	in_time.inputs.lowpass_sigma = sigma_low
+	in_time.inputs.highpass_sigma = sigma_high
+
 
 
 
